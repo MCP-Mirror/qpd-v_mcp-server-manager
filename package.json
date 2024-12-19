@@ -41,12 +41,17 @@
       },
       {
         "command": "mcp-guide.searchConfigs",
-        "title": "Search for Config Files",
-        "icon": "$(search)"
+        "title": "Add Config File",
+        "icon": "$(add)"
+      },
+      {
+        "command": "mcp-guide.browseServers",
+        "title": "Browse Available Servers",
+        "icon": "$(server)"
       },
       {
         "command": "mcp-guide.addServer",
-        "title": "Add Server",
+        "title": "Add Custom Server",
         "icon": "$(add)"
       },
       {
@@ -75,6 +80,11 @@
         },
         {
           "command": "mcp-guide.searchConfigs",
+          "when": "view == mcpServersView",
+          "group": "navigation"
+        },
+        {
+          "command": "mcp-guide.browseServers",
           "when": "view == mcpServersView",
           "group": "navigation"
         },

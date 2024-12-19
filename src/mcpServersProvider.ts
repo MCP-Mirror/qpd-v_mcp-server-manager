@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs/promises';
-import fg from 'fast-glob';
 import { homedir } from 'os';
 
 interface MCPServerConfig {
@@ -47,12 +46,6 @@ export class MCPServer extends vscode.TreeItem {
     }
 }
 
-interface ConfigSearchResult {
-    path: string;
-    label: string;
-    selected?: boolean;
-}
-
 export class MCPServersProvider implements vscode.TreeDataProvider<MCPConfigFile | MCPServer> {
     private _onDidChangeTreeData: vscode.EventEmitter<MCPConfigFile | MCPServer | undefined | null | void> = new vscode.EventEmitter<MCPConfigFile | MCPServer | undefined | null | void>();
     readonly onDidChangeTreeData: vscode.Event<MCPConfigFile | MCPServer | undefined | null | void> = this._onDidChangeTreeData.event;
@@ -63,22 +56,13 @@ export class MCPServersProvider implements vscode.TreeDataProvider<MCPConfigFile
         // Initialize with known config paths
         const homeDir = homedir();
         const appData = process.env.APPDATA || path.join(homeDir, 'AppData/Roaming');
-        const localAppData = process.env.LOCALAPPDATA || path.join(homeDir, 'AppData/Local');
 
         // Add default paths
         [
-            // Claude Desktop config locations
+            // Claude Desktop config
             path.join(appData, 'Claude/claude_desktop_config.json'),
-            path.join(homeDir, 'Library/Application Support/Claude/claude_desktop_config.json'),
-            
-            // VSCode Cline extension config locations
-            path.join(appData, 'Code/User/globalStorage/rooveterinaryinc.roo-cline/settings/cline_mcp_settings.json'),
-            path.join(homeDir, '.config/Code/User/globalStorage/rooveterinaryinc.roo-cline/settings/cline_mcp_settings.json'),
-            
-            // Other possible locations
-            path.join(appData, 'mcp/config.json'),
-            path.join(localAppData, 'mcp/config.json'),
-            path.join(homeDir, '.mcp/config.json')
+            // VSCode Cline extension config
+            path.join(appData, 'Code/User/globalStorage/rooveterinaryinc.roo-cline/settings/cline_mcp_settings.json')
         ].forEach(path => this.addKnownConfigPath(path));
     }
 
@@ -127,94 +111,48 @@ export class MCPServersProvider implements vscode.TreeDataProvider<MCPConfigFile
         return [];
     }
 
-    async searchForConfigs(): Promise<ConfigSearchResult[]> {
-        const results: ConfigSearchResult[] = [];
-        const homeDir = homedir();
-        const appData = process.env.APPDATA || path.join(homeDir, 'AppData/Roaming');
-        const localAppData = process.env.LOCALAPPDATA || path.join(homeDir, 'AppData/Local');
-        
-        // Common locations to search
-        const searchPaths = [
-            // Windows paths
-            appData,
-            localAppData,
-            path.join(homeDir, 'AppData'),
-            path.join(homeDir, 'Documents'),
-            
-            // Unix-like paths
-            path.join(homeDir, '.config'),
-            path.join(homeDir, '.local/share'),
-            path.join(homeDir, 'Library'),
-            path.join(homeDir, 'Library/Application Support')
-        ];
-
-        // Show progress indicator
-        await vscode.window.withProgress({
-            location: vscode.ProgressLocation.Notification,
-            title: "Searching for MCP config files...",
-            cancellable: true
-        }, async (progress, token) => {
-            let processedPaths = 0;
-
-            for (const searchPath of searchPaths) {
-                if (token.isCancellationRequested) {
-                    break;
-                }
-
-                try {
-                    // Search for any JSON files
-                    const pattern = path.join(searchPath, '**', '*.json');
-                    const entries = await fg(pattern, {
-                        absolute: true,
-                        ignore: ['**/node_modules/**', '**/dist/**', '**/cache/**'],
-                        onlyFiles: true
-                    });
-
-                    for (const file of entries) {
-                        if (token.isCancellationRequested) {
-                            break;
-                        }
-
-                        try {
-                            const content = await fs.readFile(file, 'utf-8');
-                            const config = JSON.parse(content);
-                            
-                            // Check if it's an MCP config file by looking for specific patterns
-                            const isMCPConfig = (
-                                // Has mcpServers object
-                                (config.mcpServers && typeof config.mcpServers === 'object') ||
-                                // Contains MCP server commands
-                                (content.includes('@modelcontextprotocol/server') || content.includes('mcp-server')) ||
-                                // File path contains MCP-related terms
-                                file.toLowerCase().includes('mcp') ||
-                                file.toLowerCase().includes('claude') ||
-                                file.toLowerCase().includes('cline')
-                            );
-
-                            if (isMCPConfig) {
-                                const label = path.basename(path.dirname(file));
-                                results.push({
-                                    path: file,
-                                    label: `${label} (${path.dirname(file)})`,
-                                    selected: false
-                                });
-                            }
-                        } catch (error) {
-                            // Skip files that can't be read or parsed
-                        }
-                    }
-
-                    processedPaths++;
-                    progress.report({ increment: (processedPaths / searchPaths.length) * 100 });
-                } catch (error) {
-                    // Skip directories that can't be searched
-                    processedPaths++;
-                    progress.report({ increment: (processedPaths / searchPaths.length) * 100 });
-                }
+    async addConfigFile(): Promise<void> {
+        const options: vscode.OpenDialogOptions = {
+            canSelectMany: false,
+            openLabel: 'Select Config File',
+            filters: {
+                'JSON files': ['json']
             }
-        });
+        };
 
-        return results;
+        const fileUri = await vscode.window.showOpenDialog(options);
+        if (fileUri && fileUri[0]) {
+            const filePath = fileUri[0].fsPath;
+            
+            try {
+                // Read and validate the config file
+                const content = await fs.readFile(filePath, 'utf-8');
+                const config = JSON.parse(content);
+
+                // Check if it's a valid MCP config file
+                if (!config.mcpServers || typeof config.mcpServers !== 'object') {
+                    // If not a valid MCP config, ask if user wants to initialize it
+                    const initChoice = await vscode.window.showWarningMessage(
+                        'This file does not appear to be an MCP config file. Would you like to initialize it as one?',
+                        'Yes',
+                        'No'
+                    );
+
+                    if (initChoice === 'Yes') {
+                        // Initialize as MCP config
+                        config.mcpServers = {};
+                        await fs.writeFile(filePath, JSON.stringify(config, null, 2));
+                    } else {
+                        return;
+                    }
+                }
+
+                this.addKnownConfigPath(filePath);
+                vscode.window.showInformationMessage(`Added config file: ${filePath}`);
+            } catch (error) {
+                vscode.window.showErrorMessage(`Failed to add config file: ${error}`);
+            }
+        }
     }
 
     async addServerToConfigs(serverName: string, serverConfig: MCPServerConfig, configPaths: string[]): Promise<void> {

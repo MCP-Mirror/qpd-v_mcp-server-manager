@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { MCPServersProvider, MCPServer } from './mcpServersProvider';
+import { serverCategories, MCPServerInfo, getServerByName } from './serverCatalog';
 
 export function activate(context: vscode.ExtensionContext) {
     // Create the server tree provider
@@ -18,22 +19,79 @@ export function activate(context: vscode.ExtensionContext) {
         }),
 
         vscode.commands.registerCommand('mcp-guide.searchConfigs', async () => {
-            const results = await mcpServersProvider.searchForConfigs();
-            
-            if (results.length === 0) {
-                vscode.window.showInformationMessage('No MCP config files found.');
+            await mcpServersProvider.addConfigFile();
+        }),
+
+        vscode.commands.registerCommand('mcp-guide.browseServers', async () => {
+            // First, try to get the latest server list
+            try {
+                const mcpGuide = vscode.extensions.getExtension('rooveterinaryinc.roo-cline');
+                if (mcpGuide) {
+                    const api = await mcpGuide.activate();
+                    if (api && api.useMCPTool) {
+                        const result = await api.useMCPTool('mcp-guide', 'list_servers', { category: 'all' });
+                        vscode.window.showInformationMessage('Retrieved latest server list from MCP Guide');
+                    }
+                }
+            } catch (error) {
+                // Continue with local server list if fetching fails
+                console.log('Using local server list:', error);
+            }
+
+            // Select a category
+            const categoryItems = serverCategories.map(cat => ({
+                label: `${cat.icon} ${cat.name}`,
+                description: `${cat.servers.length} servers`,
+                category: cat
+            }));
+
+            const selectedCategory = await vscode.window.showQuickPick(categoryItems, {
+                placeHolder: 'Select a server category'
+            });
+
+            if (!selectedCategory) {
                 return;
             }
 
-            // Create QuickPick for multi-select
+            // Then select a server from that category
+            const serverItems = selectedCategory.category.servers.map(server => ({
+                label: server.name,
+                description: server.description,
+                server: server
+            }));
+
+            const selectedServer = await vscode.window.showQuickPick(serverItems, {
+                placeHolder: 'Select a server to install'
+            });
+
+            if (!selectedServer) {
+                return;
+            }
+
+            // Get config files to install to
+            const configFiles = await mcpServersProvider.getChildren();
+            if (!configFiles || configFiles.length === 0) {
+                const addConfig = await vscode.window.showWarningMessage(
+                    'No MCP config files found. Would you like to add one?',
+                    'Yes',
+                    'No'
+                );
+
+                if (addConfig === 'Yes') {
+                    await mcpServersProvider.addConfigFile();
+                }
+                return;
+            }
+
+            // Create QuickPick for multi-select config files
             const quickPick = vscode.window.createQuickPick();
-            quickPick.title = 'Select MCP Config Files';
-            quickPick.placeholder = 'Select config files to add (use Space to select multiple)';
+            quickPick.title = 'Select Config Files';
+            quickPick.placeholder = 'Select which config files to add the server to (use Space to select multiple)';
             quickPick.canSelectMany = true;
-            
-            quickPick.items = results.map(result => ({
-                label: result.label,
-                description: result.path,
+
+            quickPick.items = configFiles.map(file => ({
+                label: file.label,
+                description: file.configPath,
                 picked: false
             }));
 
@@ -53,14 +111,30 @@ export function activate(context: vscode.ExtensionContext) {
                 const selectedPaths = quickPick.selectedItems
                     .map(item => item.description)
                     .filter((path): path is string => path !== undefined);
-                    
+
                 quickPick.hide();
 
                 if (selectedPaths.length > 0) {
-                    selectedPaths.forEach(path => {
-                        mcpServersProvider.addKnownConfigPath(path);
-                    });
-                    vscode.window.showInformationMessage(`Added ${selectedPaths.length} config file(s).`);
+                    // First install the server
+                    const terminal = vscode.window.createTerminal('MCP Server Installation');
+                    terminal.show();
+                    terminal.sendText(selectedServer.server.installCommand);
+
+                    // Then add it to the config files
+                    if (selectedServer.server.configTemplate) {
+                        await mcpServersProvider.addServerToConfigs(
+                            selectedServer.server.name,
+                            {
+                                ...selectedServer.server.configTemplate,
+                                disabled: false,
+                                alwaysAllow: []
+                            },
+                            selectedPaths
+                        );
+                        vscode.window.showInformationMessage(
+                            `Server ${selectedServer.server.name} installed and added to ${selectedPaths.length} config file(s).`
+                        );
+                    }
                 }
             });
 
@@ -76,6 +150,21 @@ export function activate(context: vscode.ExtensionContext) {
 
             if (!serverName) {
                 return;
+            }
+
+            // Check if it's a known server
+            const knownServer = getServerByName(serverName);
+            if (knownServer) {
+                const useTemplate = await vscode.window.showInformationMessage(
+                    `Found configuration template for ${serverName}. Would you like to use it?`,
+                    'Yes',
+                    'No'
+                );
+
+                if (useTemplate === 'Yes') {
+                    vscode.commands.executeCommand('mcp-guide.browseServers');
+                    return;
+                }
             }
 
             // Get the command
@@ -106,7 +195,7 @@ export function activate(context: vscode.ExtensionContext) {
             // Get all available config files
             const configFiles = await mcpServersProvider.getChildren();
             if (!configFiles || configFiles.length === 0) {
-                vscode.window.showErrorMessage('No MCP config files found. Please search for config files first.');
+                vscode.window.showErrorMessage('No MCP config files found. Please add a config file first.');
                 return;
             }
 
@@ -166,9 +255,6 @@ export function activate(context: vscode.ExtensionContext) {
             mcpServersProvider.removeServer(server);
         })
     );
-
-    // Initial search for config files
-    vscode.commands.executeCommand('mcp-guide.searchConfigs');
 }
 
 export function deactivate() {}
