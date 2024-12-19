@@ -2,7 +2,22 @@
   "name": "mcp-guide",
   "displayName": "MCP-Guide",
   "description": "A VSCode extension for installing and managing Model Context Protocol (MCP) servers - helps users discover, install, and configure MCP servers for use with Claude and other LLM clients.",
-  "version": "0.0.1",
+  "version": "0.1.4",
+  "publisher": "rooveterinaryinc",
+  "icon": "media/mcp-icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rooveterinaryinc/mcp-guide-vscode"
+  },
+  "license": "MIT",
+  "pricing": "Free",
+  "keywords": [
+    "mcp",
+    "claude",
+    "llm",
+    "ai",
+    "automation"
+  ],
   "engines": {
     "vscode": "^1.96.0"
   },

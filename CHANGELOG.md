@@ -1,25 +1,36 @@
 # Change Log
 
-All notable changes to the "mcp-guide" extension will be documented in this file.
+All notable changes to the "MCP Guide" extension will be documented in this file.
 
-## [0.0.1] - 2024-03-19
+## [0.1.4] - Initial Release
 
 ### Added
-- Initial release of MCP Guide VSCode Extension
-- Browse and install MCP servers by category
-- Configure server settings through VSCode interface
-- Manage installed servers (enable/disable/remove)
-- Support for common MCP server categories:
+- Browse and install MCP servers from a categorized catalog
+- Support for multiple config files (Claude Desktop and VSCode Cline)
+- Server management features:
+  - Enable/disable servers
+  - Edit server configurations
+  - Remove servers
+- Activity bar integration with intuitive UI
+- Full server catalog with categories:
   - Browser Automation
   - Cloud Platforms
   - Command Line
   - Communication
+  - Customer Data
   - Databases
   - Developer Tools
+  - Data Science
   - File Systems
+  - Finance & Fintech
   - Knowledge & Memory
+  - Location Services
+  - Monitoring
   - Search
+  - Security & Analysis
+  - Security & Compliance
+  - Travel & Transportation
   - Version Control
-- Integration with Claude Desktop configuration
-- User-friendly command palette interface
-- Detailed documentation and usage instructions
+  - Frameworks
+  - Clients
+  - Other Tools and Integrations
