@@ -1,0 +1,137 @@
+{
+  "name": "mcp-guide",
+  "displayName": "MCP-Guide",
+  "description": "A VSCode extension for installing and managing Model Context Protocol (MCP) servers - helps users discover, install, and configure MCP servers for use with Claude and other LLM clients.",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.96.0"
+  },
+  "categories": [
+    "Other",
+    "Tools"
+  ],
+  "activationEvents": [
+    "onView:mcpServersView"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "mcp-explorer",
+          "title": "MCP Servers",
+          "icon": "media/mcp-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "mcp-explorer": [
+        {
+          "id": "mcpServersView",
+          "name": "Installed Servers",
+          "type": "tree"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "mcp-guide.refreshServers",
+        "title": "Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "mcp-guide.searchConfigs",
+        "title": "Search for Config Files",
+        "icon": "$(search)"
+      },
+      {
+        "command": "mcp-guide.addServer",
+        "title": "Add Server",
+        "icon": "$(add)"
+      },
+      {
+        "command": "mcp-guide.editServer",
+        "title": "Edit Server Configuration"
+      },
+      {
+        "command": "mcp-guide.enableServer",
+        "title": "Enable Server"
+      },
+      {
+        "command": "mcp-guide.disableServer",
+        "title": "Disable Server"
+      },
+      {
+        "command": "mcp-guide.removeServer",
+        "title": "Remove Server"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "mcp-guide.refreshServers",
+          "when": "view == mcpServersView",
+          "group": "navigation"
+        },
+        {
+          "command": "mcp-guide.searchConfigs",
+          "when": "view == mcpServersView",
+          "group": "navigation"
+        },
+        {
+          "command": "mcp-guide.addServer",
+          "when": "view == mcpServersView",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "mcp-guide.editServer",
+          "when": "view == mcpServersView && viewItem == server",
+          "group": "inline"
+        },
+        {
+          "command": "mcp-guide.enableServer",
+          "when": "view == mcpServersView && viewItem == server-disabled",
+          "group": "inline"
+        },
+        {
+          "command": "mcp-guide.disableServer",
+          "when": "view == mcpServersView && viewItem == server-enabled",
+          "group": "inline"
+        },
+        {
+          "command": "mcp-guide.removeServer",
+          "when": "view == mcpServersView && viewItem =~ /server/",
+          "group": "inline"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "package": "node esbuild.js --production",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "16.x",
+    "@types/vscode": "^1.96.0",
+    "@typescript-eslint/eslint-plugin": "^5.59.1",
+    "@typescript-eslint/parser": "^5.59.1",
+    "@vscode/test-electron": "^2.3.0",
+    "esbuild": "^0.17.19",
+    "eslint": "^8.39.0",
+    "glob": "^8.1.0",
+    "mocha": "^10.2.0",
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "axios": "^1.6.5"
+  }
+}
