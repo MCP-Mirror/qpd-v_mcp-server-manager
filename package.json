@@ -42,7 +42,7 @@
       {
         "command": "mcp-guide.searchConfigs",
         "title": "Add Config File",
-        "icon": "$(add)"
+        "icon": "$(new-file)"
       },
       {
         "command": "mcp-guide.browseServers",

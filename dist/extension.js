@@ -556,6 +556,52 @@ var serverCategories = [
       createServer("@wong2/mcp-cli", "MCP server testing tool", "other"),
       createServer("@zueai/mcp-manager", "MCP server management UI", "other")
     ]
+  },
+  {
+    id: "data_science",
+    name: "Data Science",
+    icon: "\u{1F9EE}",
+    description: "Integrations and tools designed to simplify data exploration, analysis and enhance data science workflows.",
+    servers: [
+      createServer("@reading-plus-ai/mcp-server-data-exploration", "Autonomous data exploration on .csv-based datasets", "data_science"),
+      createServer("@vivekvells/mcp-pandoc", "Document format conversion using Pandoc", "data_science")
+    ]
+  },
+  {
+    id: "frameworks",
+    name: "Frameworks",
+    icon: "\u26A1\uFE0F",
+    description: "Development frameworks and SDKs for building MCP servers.",
+    servers: [
+      createServer("@firebase/genkit-mcp", "Genkit integration", "frameworks"),
+      createServer("@jlowin/fastmcp", "Python framework", "frameworks"),
+      createServer("@linux-china/mcp-rs-template", "Rust template", "frameworks"),
+      createServer("@mark3labs/mcp-go", "Golang SDK", "frameworks"),
+      createServer("@metoro-io/mcp-golang", "Type-safe Golang framework", "frameworks"),
+      createServer("@modelcontextprotocol/server-langchain", "LangChain integration", "frameworks"),
+      createServer("@quarkiverse/quarkus-mcp-server", "Quarkus framework MCP integration", "frameworks"),
+      createServer("@quantgeekdev/mcp-framework", "TypeScript framework", "frameworks"),
+      createServer("@strowk/foxy-contexts", "Declarative Golang library", "frameworks"),
+      createServer("@wong2/litemcp", "JavaScript/TypeScript framework", "frameworks")
+    ]
+  },
+  {
+    id: "clients",
+    name: "Clients",
+    icon: "\u{1F5A5}\uFE0F",
+    description: "Client applications and integrations for using MCP servers.",
+    servers: [
+      createServer("@3choff/mcp-chatbot", "CLI chatbot", "clients"),
+      createServer("@adhikasp/mcp-client-cli", "Multi-model CLI client", "clients"),
+      createServer("@boilingdata/mcp-server-and-gw", "HTTP SSE gateway", "clients"),
+      createServer("@continuedev/continue", "VSCode extension", "clients"),
+      createServer("@firebase/genkit", "Agent framework", "clients"),
+      createServer("@lightconetech/mcp-gateway", "SSE Server gateway", "clients"),
+      createServer("@mark3labs/mcphost", "CLI host application", "clients"),
+      createServer("@secretiveshell/mcp-bridge", "OpenAI middleware proxy", "clients"),
+      createServer("@upsonic/gpt-computer-assistant", "Dockerized client", "clients"),
+      createServer("@zed-industries/zed", "Multiplayer code editor", "clients")
+    ]
   }
 ];
 function getServerByName(name) {
