@@ -126,12 +126,12 @@
     "@vscode/test-electron": "^2.3.0",
     "esbuild": "^0.17.19",
     "eslint": "^8.39.0",
-    "glob": "^8.1.0",
     "mocha": "^10.2.0",
     "typescript": "^5.0.4"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",
-    "axios": "^1.6.5"
+    "axios": "^1.6.5",
+    "fast-glob": "^3.3.2"
   }
 }

@@ -18,15 +18,53 @@ export function activate(context: vscode.ExtensionContext) {
         }),
 
         vscode.commands.registerCommand('mcp-guide.searchConfigs', async () => {
-            const searching = await vscode.window.withProgress({
-                location: vscode.ProgressLocation.Notification,
-                title: "Searching for MCP config files...",
-                cancellable: false
-            }, async () => {
-                await mcpServersProvider.searchForConfigs();
-            });
+            const results = await mcpServersProvider.searchForConfigs();
             
-            vscode.window.showInformationMessage('MCP config file search completed.');
+            if (results.length === 0) {
+                vscode.window.showInformationMessage('No MCP config files found.');
+                return;
+            }
+
+            // Create QuickPick for multi-select
+            const quickPick = vscode.window.createQuickPick();
+            quickPick.title = 'Select MCP Config Files';
+            quickPick.placeholder = 'Select config files to add (use Space to select multiple)';
+            quickPick.canSelectMany = true;
+            
+            quickPick.items = results.map(result => ({
+                label: result.label,
+                description: result.path,
+                picked: false
+            }));
+
+            quickPick.buttons = [
+                {
+                    iconPath: new vscode.ThemeIcon('check-all'),
+                    tooltip: 'Select All'
+                }
+            ];
+
+            quickPick.onDidTriggerButton(button => {
+                // Select all items
+                quickPick.selectedItems = quickPick.items;
+            });
+
+            quickPick.onDidAccept(async () => {
+                const selectedPaths = quickPick.selectedItems
+                    .map(item => item.description)
+                    .filter((path): path is string => path !== undefined);
+                    
+                quickPick.hide();
+
+                if (selectedPaths.length > 0) {
+                    selectedPaths.forEach(path => {
+                        mcpServersProvider.addKnownConfigPath(path);
+                    });
+                    vscode.window.showInformationMessage(`Added ${selectedPaths.length} config file(s).`);
+                }
+            });
+
+            quickPick.show();
         }),
 
         vscode.commands.registerCommand('mcp-guide.addServer', async () => {
@@ -65,44 +103,51 @@ export function activate(context: vscode.ExtensionContext) {
                 alwaysAllow: []
             };
 
-            // Get the config file to add to
+            // Get all available config files
             const configFiles = await mcpServersProvider.getChildren();
             if (!configFiles || configFiles.length === 0) {
                 vscode.window.showErrorMessage('No MCP config files found. Please search for config files first.');
                 return;
             }
 
-            const selectedConfig = await vscode.window.showQuickPick(
-                configFiles.map(file => ({
-                    label: file.label,
-                    configPath: file.configPath
-                })),
+            // Create QuickPick for multi-select config files
+            const quickPick = vscode.window.createQuickPick();
+            quickPick.title = 'Select Config Files';
+            quickPick.placeholder = 'Select which config files to add the server to (use Space to select multiple)';
+            quickPick.canSelectMany = true;
+
+            quickPick.items = configFiles.map(file => ({
+                label: file.label,
+                description: file.configPath,
+                picked: false
+            }));
+
+            quickPick.buttons = [
                 {
-                    placeHolder: 'Select config file to add server to'
+                    iconPath: new vscode.ThemeIcon('check-all'),
+                    tooltip: 'Select All'
                 }
-            );
+            ];
 
-            if (!selectedConfig) {
-                return;
-            }
+            quickPick.onDidTriggerButton(button => {
+                // Select all items
+                quickPick.selectedItems = quickPick.items;
+            });
 
-            try {
-                const fs = require('fs').promises;
-                const content = await fs.readFile(selectedConfig.configPath, 'utf-8');
-                const config = JSON.parse(content);
+            quickPick.onDidAccept(async () => {
+                const selectedPaths = quickPick.selectedItems
+                    .map(item => item.description)
+                    .filter((path): path is string => path !== undefined);
 
-                // Add the new server
-                config.mcpServers = config.mcpServers || {};
-                config.mcpServers[serverName] = serverConfig;
+                quickPick.hide();
 
-                // Save the config
-                await fs.writeFile(selectedConfig.configPath, JSON.stringify(config, null, 2));
-                mcpServersProvider.refresh();
+                if (selectedPaths.length > 0) {
+                    await mcpServersProvider.addServerToConfigs(serverName, serverConfig, selectedPaths);
+                    vscode.window.showInformationMessage(`Server ${serverName} added to ${selectedPaths.length} config file(s).`);
+                }
+            });
 
-                vscode.window.showInformationMessage(`Server ${serverName} added successfully.`);
-            } catch (error) {
-                vscode.window.showErrorMessage(`Failed to add server: ${error}`);
-            }
+            quickPick.show();
         }),
 
         vscode.commands.registerCommand('mcp-guide.editServer', (server: MCPServer) => {
