@@ -1,13 +1,13 @@
-# MCP Guide for VSCode
+# MCP Server Manager
 
-A VSCode extension for installing and managing Model Context Protocol (MCP) servers - helps users discover, install, and configure MCP servers for use with Claude and other LLM clients.
+Install and manage Model Context Protocol (MCP) servers for Claude and other LLM clients. Browse available servers, configure settings, and manage multiple configurations.
 
 ## Features
 
-- **Browse Available Servers**: Discover and install MCP servers from a curated catalog
-- **Manage Configurations**: Add and edit MCP server configurations across multiple config files
-- **Server Management**: Enable, disable, and remove installed servers
-- **Multi-Config Support**: Works with both Claude Desktop and VSCode Cline configurations
+- **Server Catalog**: Browse and install from a comprehensive list of available MCP servers
+- **Multi-Config Support**: Manage servers across multiple configuration files (Claude Desktop, VSCode Cline)
+- **Server Management**: Enable, disable, and configure installed servers
+- **Easy Installation**: Simple interface for adding and removing MCP servers
 
 ## Installation
 
@@ -43,8 +43,8 @@ A VSCode extension for installing and managing Model Context Protocol (MCP) serv
 
 This extension contributes the following settings:
 
-* `mcp-guide.configPaths`: List of MCP configuration file paths to monitor
-* `mcp-guide.autoRefresh`: Enable/disable automatic refresh of server status
+* `mcp-server-manager.configPaths`: List of MCP configuration file paths to monitor
+* `mcp-server-manager.autoRefresh`: Enable/disable automatic refresh of server status
 
 ## Release Notes
 

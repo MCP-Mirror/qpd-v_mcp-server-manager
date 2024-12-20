@@ -1,7 +1,7 @@
 {
-  "name": "mcp-guide",
-  "displayName": "MCP-Guide",
-  "description": "A VSCode extension for installing and managing Model Context Protocol (MCP) servers - helps users discover, install, and configure MCP servers for use with Claude and other LLM clients.",
+  "name": "mcp-server-manager",
+  "displayName": "MCP Server Manager",
+  "description": "Install and manage Model Context Protocol (MCP) servers for Claude and other LLM clients. Browse available servers, configure settings, and manage multiple configurations.",
   "version": "0.1.4",
   "publisher": "qpdv",
   "author": {
@@ -38,8 +38,8 @@
     "vscode": "^1.96.0"
   },
   "categories": [
-    "Other",
-    "Tools"
+    "Programming Languages",
+    "Other"
   ],
   "activationEvents": [
     "onView:mcpServersView"

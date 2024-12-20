@@ -1,6 +1,6 @@
 # Change Log
 
-All notable changes to the "MCP Guide" extension will be documented in this file.
+All notable changes to the "MCP Server Manager" extension will be documented in this file.
 
 ## [0.1.4] - Initial Release
 
