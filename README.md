@@ -1,5 +1,7 @@
 # MCP Server Manager
 
+WARNING CURRENTLY HAS BUGS!!!!!!
+
 Install and manage Model Context Protocol (MCP) servers for Claude and other LLM clients. Browse available servers, configure settings, and manage multiple configurations.
 
 ## Features
