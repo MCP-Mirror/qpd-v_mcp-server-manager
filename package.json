@@ -2,19 +2,19 @@
   "name": "mcp-server-manager",
   "displayName": "MCP Server Manager",
   "description": "Install and manage Model Context Protocol (MCP) servers for Claude and other LLM clients. Browse available servers, configure settings, and manage multiple configurations.",
-  "version": "0.1.4",
+  "version": "0.1.6",
   "publisher": "qpdv",
   "author": {
     "name": "qpdv",
     "url": "https://github.com/qpd-v"
   },
-  "homepage": "https://github.com/qpd-v/mcp-guide-vscode",
+  "homepage": "https://github.com/qpd-v/mcp-server-manager",
   "repository": {
     "type": "git",
-    "url": "https://github.com/qpd-v/mcp-guide-vscode.git"
+    "url": "https://github.com/qpd-v/mcp-server-manager.git"
   },
   "bugs": {
-    "url": "https://github.com/qpd-v/mcp-guide-vscode/issues"
+    "url": "https://github.com/qpd-v/mcp-server-manager/issues"
   },
   "galleryBanner": {
     "color": "#1e1e1e",
@@ -23,7 +23,7 @@
   "icon": "media/mcp-icon.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/rooveterinaryinc/mcp-guide-vscode"
+    "url": "https://github.com/qpd-v/mcp-server-manager/"
   },
   "license": "MIT",
   "pricing": "Free",
